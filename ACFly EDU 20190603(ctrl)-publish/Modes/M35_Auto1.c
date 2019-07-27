@@ -169,32 +169,34 @@ static void M35_Auto1_MainFunc()
 //			    Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( 15.0f , -constrain_float( SDI_Point.y * 3.0f , 100 )*5 , 0.08f , 0.08f	);
 //				 }
 //				  else if(Patrol.Langing_flag == 1)
-           if( Time_isValid(SDI_Time) && get_pass_time(SDI_Time) < 2.0f)
-						{
-								if(Patrol.Langing_flag == 1)
-								{
-									Patrol.Langing_flag = 0;
-									if(fabsf(SDI_Point.x)<5 && fabsf(SDI_Point.y)<5)
-									{
-										Attitude_Control_set_YawLock();
-										Position_Control_set_XYLock();
-										++Mode_Inf->auto_step1;
-										Mode_Inf->auto_counter = 0;
-									}
-									else
-									{
-										Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
-												constrain_float( SDI_Point.x * 0.2f , 50 ) ,	\
-												constrain_float( SDI_Point.y * 0.2f , 50 ) ,	\
-												0.15f ,	\
-												0.15f	\
-											);	
-									}
-			//						Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( constrain_float( SDI_Point.x * 3.0f , 100 )*5,
-			//																																				 constrain_float( SDI_Point.y * 3.0f , 100 )*5 ,
-			//																																				0.08f , 
-			//							
-								}
+
+           if( Time_isValid(SDI_Time) && get_pass_time(SDI_Time) < 2.0f && Patrol.Langing_flag == 1)
+						{		
+										Patrol.Langing_flag = 0;
+							      //差值小于5个像素不移动
+										if(fabsf(SDI_Point.x)<5 && fabsf(SDI_Point.y)<5) 
+										{
+											//连续保持误差像素小于5到2秒进入下降模式
+											if(++Mode_Inf->auto_counter >100)
+											{											
+													Attitude_Control_set_YawLock();
+													Position_Control_set_XYLock();
+													++Mode_Inf->auto_step1;
+													Mode_Inf->auto_counter = 0;
+											}
+										}
+										//否则调整位置
+										else                              
+										{
+											Mode_Inf->auto_counter = 0;
+											Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
+													constrain_float( SDI_Point.x * 0.8f , 50 ) ,	\
+													constrain_float( SDI_Point.y * 0.8f , 50 ) ,	\
+													0.15f ,	\
+													0.15f	\
+												);
+										}
+									
 							}
 						
 					//等待按钮按下

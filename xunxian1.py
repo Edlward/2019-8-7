@@ -205,7 +205,7 @@ while(True):
           uart.write(data)
 
           data = bytearray([center_x_rect, center_y_rect])
-          print(center_x_rect, center_y_rect)
+          print(center_y_rect, center_x_rect)
           uart.write(data)
           img.draw_circle(circles[0].x(), circles[0].y(), circles[0].r(), color = (255, 0, 0))
     else:

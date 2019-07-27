@@ -393,9 +393,15 @@ static void Counter(unsigned int Task_ID)
 					TAG0.Anothor1 = sqrt((pow(TAG0.Anothor1,2) - pow(h,2)));
 					TAG0.Anothor2 = sqrt((pow(TAG0.Anothor2,2) - pow(h,2)));
 					TAG0.Anothor3 = sqrt((pow(TAG0.Anothor3,2) - pow(h,2)));
-
+          
+	        //使用DOA算法获取坐标（基站坐标为：基站0 (0,0)，基站1(500,0), 基站2 (250,500).距离单位cm ）
           Base_station0.y = ((pow(TAG0.Anothor0,2) - pow(TAG0.Anothor1, 2))/1000 + 250);
 					Base_station0.x = ((pow(TAG0.Anothor0,2) + pow(TAG0.Anothor1, 2) - 2*pow(TAG0.Anothor2,2))/2000 + 187.5);
+	
+//	        //使用Chan算法获取坐标（基站坐标为：基站0 (0,0)，基站1(500,0), 基站2 (250,500).距离单位cm ）
+//	        Base_station0.y = TAG0.Anothor0*(TAG0.Anothor0/500.0 - TAG0.Anothor1/500.0) - pow((TAG0.Anothor0-TAG0.Anothor1),2)/1000.0 + 250;
+//	        Base_station0.x = pow((TAG0.Anothor0-TAG0.Anothor1),2)/2000.0 - pow((TAG0.Anothor0 - TAG0.Anothor2),2)/1000.0 + TAG0.Anothor0*(TAG0.Anothor0+TAG0.Anothor1-2*TAG0.Anothor2)/1000 + 187.5;
+//	
 					if(fabsf(Base_station0.x)<10000 && fabsf(Base_station0.y) < 10000)
 					{
 						 PositionSensorUpdatePosition(default_uwb_sensor_index, Base_station0, true, -1);
