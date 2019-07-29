@@ -194,29 +194,37 @@ while(True):
           led.on()
           center_y_rect = (goal_x - circles[0].x())*0.6
           center_x_rect = (goal_y - circles[0].y())*0.6
-          data = bytearray([0x7F,0x7E])
-          uart.write(data)
 
-          data = bytearray([0x02, 8])
-          uart.write(data)
+          if abs(center_y_rect)>3 or abs(center_x_rect)>3:
 
-          data = pack('f', center_x_rect)
-          uart.write(data)
+              data = bytearray([0x7F,0x7E])
+              uart.write(data)
 
-          data = pack('f', center_y_rect)
-          uart.write(data)
+              data = bytearray([0x02, 8])
+              uart.write(data)
+
+              data = pack('f', center_x_rect)
+              uart.write(data)
+
+              data = pack('f', center_y_rect)
+              uart.write(data)
+          else:
+              data = bytearray([0x7F,0x7E])
+              uart.write(data)
+
+              data = bytearray([0x02, 8])
+              uart.write(data)
+
+              data = pack('f', 0)
+              uart.write(data)
+
+              data = pack('f', 0)
+              uart.write(data)
 
 
           print(center_x_rect, center_y_rect)
           img.draw_circle(circles[0].x(), circles[0].y(), circles[0].r(), thickness = 5, color = (0, 255, 0))
     else:
-        data = bytearray([0x7F,0x7E])
-        uart.write(data)
-
-        data = bytearray([0x05, 0])
-        uart.write(data)
-
-
         for r in roi_cap:
             i+=1;
             blobs = img.find_blobs(GRAYSCALE_THRESGOLD, roi=r[0:4], merge=True) # r[0:4] is roi tuple.
@@ -300,35 +308,41 @@ while(True):
 
         move_x=goal_x-mid_x;
         move_y=goal_y-mid_y;
+        angle_offset=calculate_angle_free(up_x,up_y,mid_x,mid_y)
+
+        '''
         if   center_flag3 and center_flag2 :
            angle_offset=calculate_angle_free(up_x,up_y,mid_x,mid_y)
         elif center_flag3 and center_flag1 :
            angle_offset=calculate_angle_free(left_x,left_y,mid_x,mid_y)
         elif center_flag3 and center_flag5 :
            angle_offset=calculate_angle_free(right_x,right_y,mid_x,mid_y)
+        '''
 
-        if angle_offset < -50 :
+        if angle_offset < -70 :
            angle_offset = -90
-        elif angle_offset > 50 :
+        elif angle_offset > 70 :
            angle_offset = 90
-
-        data = bytearray([0x7F,0x7E])
-        uart.write(data)
-
-        data = bytearray([3, 16])
-        uart.write(data)
 
         if move_x==80:
            move_x=0
-        data = pack('f', angle_offset)
-        uart.write(data)
-        data = pack('f', move_x)
-        uart.write(data)
-        data = pack('f', cross_y)
-        uart.write(data)
-        data = pack('f', cross_x)
-        uart.write(data)
-        led.off()
+
+        if abs(angle_offset) >2 or abs(move_x) > 3:
+            data = bytearray([0x7F,0x7E])
+            uart.write(data)
+
+            data = bytearray([3, 16])
+            uart.write(data)
+            data = pack('f', angle_offset)
+            uart.write(data)
+            data = pack('f', move_x)
+            uart.write(data)
+            data = pack('f', cross_y)
+            uart.write(data)
+            data = pack('f', cross_x)
+            uart.write(data)
+            led.off()
+
         print('angle_offset: %d, move_x: %d, cross_x: %d, cross_y: %d'%(angle_offset,move_x, cross_y,  cross_x))
 
 

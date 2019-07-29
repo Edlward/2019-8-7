@@ -192,11 +192,13 @@ static void SDI_Server( unsigned int Task_ID )
 							Patrol.Langing_flag = 0;
 							SDI_Point.x = *(float*)&msg_pack[0];
 							SDI_Point.y = *(float*)&msg_pack[4];
+							Patrol.Langing_flag = 3;
 							SDI_Point.z = 0;
 							SDI_Time = get_TIME_now();
 						}
 						else if( msg_type == 3 )
 						{
+							Patrol.Langing_flag = 4;
 							//»ñÈ¡Æ«º½½Ç
 						 SDI_Point.x = *(float*)&msg_pack[0];
 							

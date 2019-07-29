@@ -124,7 +124,7 @@ static void M35_Auto1_MainFunc()
 				//等待按钮按下起飞
 				if( get_is_inFlight() == false && fabsf( rc->data[5] - Mode_Inf->last_button_value ) > 15 )
 				{
-					Position_Control_Takeoff_HeightRelative( 150.0f );
+					Position_Control_Takeoff_HeightRelative( 100.0f );
 					++Mode_Inf->auto_step1;
 					Mode_Inf->auto_counter = 0;
 				}
@@ -142,17 +142,84 @@ static void M35_Auto1_MainFunc()
 				break;
 				
 			case 3:
+				  if(Time_isValid(SDI_Time) && get_pass_time(SDI_Time) < 2.0f)
+					{
+						
+/*********************************降落部分************************************/
+						if(Patrol.Langing_flag == 3)
+					  {
+							Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
+													constrain_float( SDI_Point.x  , 50 ) ,	\
+													constrain_float( SDI_Point.y  , 50 ) ,	\
+													0.2f ,	\
+													0.2f	\
+												);
+							if(fabs(SDI_Point.x) > 5 && fabs(SDI_Point.y) > 5)
+							{
+								Mode_Inf->auto_counter = 0;
+							}
+							
+							if(++Mode_Inf->auto_counter >250)
+							{
+								Position_Control_set_XYLock();
+					      ++Mode_Inf->auto_step1;
+				      	Mode_Inf->auto_counter = 0;
+							}
+						}
+/******************************降落部分完**********************************/
+						
+						
+/****************************巡线部分***************************************/				
+						else if(Patrol.Langing_flag == 4)
+						{
+							if(fabs(SDI_Point.x) >75 && Locking_flag == 0)
+							{
+									Locking_flag = 1;
+									Mode_Inf->auto_counter = 0;
+							}
+							else if(++Mode_Inf->auto_counter < 100)
+							{
+									
+								Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.0f , 70 ) ));
+								Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
+													constrain_float( Patrol.cross_x*0.6  , 50 ) ,	\
+													constrain_float( Patrol.cross_y*0.6  , 50 ) ,	\
+													0.2f ,	\
+													0.2f	\
+												);
+								
+							}
+							else
+							{
+								Locking_flag = 0;
+							  Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.0f , 70 ) ));
+			          Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( 10.0f , constrain_float( SDI_Point.y * 0.6f , 100 )*5 , 0.08f , 0.08f	);
+							}
+						}
+/***************************巡线部分完**************************************/
+					}
+					
+					
+					
+					
+					
+					
+					
+					
+					
 				
-//			   if(SDI_Point.x !=200)
+//			   if(Patrol.Langing_flag == 4)
 //				 {
 //					Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.0f , 70 ) ));
 //			    Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( 15.0f , -constrain_float( SDI_Point.y * 3.0f , 100 )*5 , 0.08f , 0.08f	);
 //				 }
-//				if(SDI_Point.x == 200)
+//				//if(SDI_Point.x == 200)
+//				else if(Locking_flag == 0) 
 //				{
+//					Locking_flag=1;
 //					Attitude_Control_set_YawLock();
 //					Position_Control_set_XYLock();
-//					//Position_Control_set_TargetVelocityZ( -50 );
+//					Position_Control_set_TargetVelocityZ( -50 );
 //				}
 //				if(Patrol.Langing_flag == 1)
 //				{
@@ -170,36 +237,54 @@ static void M35_Auto1_MainFunc()
 //					Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.0f , 70 ) ));
 //			    Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( 15.0f , -constrain_float( SDI_Point.y * 3.0f , 100 )*5 , 0.08f , 0.08f	);
 //				 }
-//				  else if(Patrol.Langing_flag == 1)
-
-           if( Time_isValid(SDI_Time) && get_pass_time(SDI_Time) < 2.0f && Patrol.Langing_flag == 0)
-						{		
-									if(fabs(SDI_Point.x) > 5 && fabs(SDI_Point.y) > 5)
-									{
-										Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
-													constrain_float( SDI_Point.x  , 50 ) ,	\
-													constrain_float( SDI_Point.y  , 50 ) ,	\
-													0.2f ,	\
-													0.2f	\
-												);
-										Locking_flag = 0;
-									}
-									else if(Locking_flag == 0)
-									{
-										Locking_flag = 1;
-										Attitude_Control_set_YawLock();
-								    Position_Control_set_XYLock();
-									}
-						}
-						else if(Patrol.Langing_flag==1)
-						{
-							 if(Locking_flag == 0)
-							 {
-								 Locking_flag = 1;
-								Attitude_Control_set_YawLock();
-								Position_Control_set_XYLock();
-							 }
-						 }
+//           if( Time_isValid(SDI_Time) && get_pass_time(SDI_Time) < 2.0f && Patrol.Langing_flag == 0)
+//						{		
+//									if(Patrol.Langing_flag == 3)   //Patrol.Langing_flag该标志等于3的时候进行定点降落
+//									{
+//										Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
+//													constrain_float( SDI_Point.x  , 50 ) ,	\
+//													constrain_float( SDI_Point.y  , 50 ) ,	\
+//													0.2f ,	\
+//													0.2f	\
+//												);
+//										Patrol.Langing_flag = 0;
+//										Locking_flag = 0;
+//									}
+//									else if(Patrol.Langing_flag == 4)   //Patrol.Langing_flag该标志等于4的时候进行巡线
+//									{
+//										Locking_flag = 0;
+//										Patrol.Langing_flag = 0;
+//										Mode_Inf->auto_counter = 0;
+//										
+//										Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.0f , 70 ) ));
+//			              Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( 15.0f , -constrain_float( SDI_Point.y * 3.0f , 100 )*5 , 0.08f , 0.08f	);
+//									}
+//				          else if(Locking_flag == 0)
+//									{
+//										    Locking_flag = 1;
+//											  Mode_Inf->auto_counter = 0;
+//												Attitude_Control_set_YawLock();
+//												Position_Control_set_XYLock();
+//									}
+//									
+//						}
+//						else
+//						{
+//							 if(Locking_flag == 0)
+//							 {
+//								Locking_flag = 1;
+//								Mode_Inf->auto_counter = 0;
+//								Attitude_Control_set_YawLock();
+//								Position_Control_set_XYLock();
+//							 }
+//						 }
+//						
+//						if (++Mode_Inf->auto_counter > 250)
+//						{
+//								Position_Control_set_XYLock();
+//								++Mode_Inf->auto_step1;
+//								Mode_Inf->auto_counter = 0;
+//						}
 						
 					//等待按钮按下
 				if( fabsf( rc->data[5] - Mode_Inf->last_button_value ) > 15 )
