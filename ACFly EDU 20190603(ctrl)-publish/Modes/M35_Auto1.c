@@ -43,6 +43,8 @@ typedef struct
 }MODE_INF;
 static MODE_INF* Mode_Inf;
 
+static uint8_t Locking_flag = 0;
+
 static void M35_Auto1_enter()
 {
 	Led_setStatus( LED_status_running1 );
@@ -122,7 +124,7 @@ static void M35_Auto1_MainFunc()
 				//等待按钮按下起飞
 				if( get_is_inFlight() == false && fabsf( rc->data[5] - Mode_Inf->last_button_value ) > 15 )
 				{
-					Position_Control_Takeoff_HeightRelative( 100.0f );
+					Position_Control_Takeoff_HeightRelative( 150.0f );
 					++Mode_Inf->auto_step1;
 					Mode_Inf->auto_counter = 0;
 				}
@@ -170,34 +172,34 @@ static void M35_Auto1_MainFunc()
 //				 }
 //				  else if(Patrol.Langing_flag == 1)
 
-           if( Time_isValid(SDI_Time) && get_pass_time(SDI_Time) < 2.0f && Patrol.Langing_flag == 1)
+           if( Time_isValid(SDI_Time) && get_pass_time(SDI_Time) < 2.0f && Patrol.Langing_flag == 0)
 						{		
-										Patrol.Langing_flag = 0;
-							      //差值小于5个像素不移动
-										if(fabsf(SDI_Point.x)<5 && fabsf(SDI_Point.y)<5) 
-										{
-											//连续保持误差像素小于5到2秒进入下降模式
-											if(++Mode_Inf->auto_counter >100)
-											{											
-													Attitude_Control_set_YawLock();
-													Position_Control_set_XYLock();
-													++Mode_Inf->auto_step1;
-													Mode_Inf->auto_counter = 0;
-											}
-										}
-										//否则调整位置
-										else                              
-										{
-											Mode_Inf->auto_counter = 0;
-											Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
-													constrain_float( SDI_Point.x * 0.8f , 50 ) ,	\
-													constrain_float( SDI_Point.y * 0.8f , 50 ) ,	\
-													0.15f ,	\
-													0.15f	\
+									if(fabs(SDI_Point.x) > 5 && fabs(SDI_Point.y) > 5)
+									{
+										Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
+													constrain_float( SDI_Point.x  , 50 ) ,	\
+													constrain_float( SDI_Point.y  , 50 ) ,	\
+													0.2f ,	\
+													0.2f	\
 												);
-										}
-									
-							}
+										Locking_flag = 0;
+									}
+									else if(Locking_flag == 0)
+									{
+										Locking_flag = 1;
+										Attitude_Control_set_YawLock();
+								    Position_Control_set_XYLock();
+									}
+						}
+						else if(Patrol.Langing_flag==1)
+						{
+							 if(Locking_flag == 0)
+							 {
+								 Locking_flag = 1;
+								Attitude_Control_set_YawLock();
+								Position_Control_set_XYLock();
+							 }
+						 }
 						
 					//等待按钮按下
 				if( fabsf( rc->data[5] - Mode_Inf->last_button_value ) > 15 )

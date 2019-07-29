@@ -165,11 +165,12 @@ flag1 = 0
 flag3 = 0
 flag = 1
 cross_flag = 0
-led4 = pyb.LED(4)
+led = pyb.LED(1)
 #------------------------------------------main
 while(True):
     clock.tick()
     #img = sensor.snapshot().lens_corr(1.8)
+
     img = sensor.snapshot() # Take a picture and return the image.
     #for i in range(100):
             #img = sensor.snapshot()
@@ -188,27 +189,34 @@ while(True):
         #    img = sensor.snapshot()
          #   img.binary([high_threshold], invert = 1)
 
-    circles = img.find_circles(threshold = 2500, x_margin =70, y_margin = 70, r_margin = 70,r_min = 5, r_max = 150, r_step = 1)
+    circles = img.find_circles(threshold = 2500, x_margin =20, y_margin = 20, r_margin = 20,r_min = 5, r_max = 20, r_step = 2)
     if circles :
-          center_x_rect = goal_x - circles[0].x()
-          center_y_rect = goal_y - circles[0].y()
+          led.on()
+          center_y_rect = (goal_x - circles[0].x())*0.6
+          center_x_rect = (goal_y - circles[0].y())*0.6
           data = bytearray([0x7F,0x7E])
           uart.write(data)
 
           data = bytearray([0x02, 8])
           uart.write(data)
 
-          data = pack('f', center_y_rect)
-          uart.write(data)
-
           data = pack('f', center_x_rect)
           uart.write(data)
 
-          data = bytearray([center_x_rect, center_y_rect])
-          print(center_y_rect, center_x_rect)
+          data = pack('f', center_y_rect)
           uart.write(data)
-          img.draw_circle(circles[0].x(), circles[0].y(), circles[0].r(), color = (255, 0, 0))
+
+
+          print(center_x_rect, center_y_rect)
+          img.draw_circle(circles[0].x(), circles[0].y(), circles[0].r(), thickness = 5, color = (0, 255, 0))
     else:
+        data = bytearray([0x7F,0x7E])
+        uart.write(data)
+
+        data = bytearray([0x05, 0])
+        uart.write(data)
+
+
         for r in roi_cap:
             i+=1;
             blobs = img.find_blobs(GRAYSCALE_THRESGOLD, roi=r[0:4], merge=True) # r[0:4] is roi tuple.
@@ -289,41 +297,40 @@ while(True):
             draw_cross_point(old_cross_x, old_cross_y)
 
     #----------------------------------figure out uart send data
-        if lines:
-            move_x=goal_x-mid_x;
-            move_y=goal_y-mid_y;
-            if   center_flag3 and center_flag2 :
-               angle_offset=calculate_angle_free(up_x,up_y,mid_x,mid_y)
-            elif center_flag3 and center_flag1 :
-               angle_offset=calculate_angle_free(left_x,left_y,mid_x,mid_y)
-            elif center_flag3 and center_flag5 :
-               angle_offset=calculate_angle_free(right_x,right_y,mid_x,mid_y)
 
-            if angle_offset < -50 :
-               angle_offset = -90
-            elif angle_offset > 50 :
-               angle_offset = 90
+        move_x=goal_x-mid_x;
+        move_y=goal_y-mid_y;
+        if   center_flag3 and center_flag2 :
+           angle_offset=calculate_angle_free(up_x,up_y,mid_x,mid_y)
+        elif center_flag3 and center_flag1 :
+           angle_offset=calculate_angle_free(left_x,left_y,mid_x,mid_y)
+        elif center_flag3 and center_flag5 :
+           angle_offset=calculate_angle_free(right_x,right_y,mid_x,mid_y)
 
-            data = bytearray([0x7F,0x7E])
-            uart.write(data)
+        if angle_offset < -50 :
+           angle_offset = -90
+        elif angle_offset > 50 :
+           angle_offset = 90
 
-            data = bytearray([3, 16])
-            uart.write(data)
+        data = bytearray([0x7F,0x7E])
+        uart.write(data)
 
-            data = pack('f', angle_offset)
-            uart.write(data)
-            data = pack('f', move_x)
-            uart.write(data)
-            data = pack('f', cross_x)
-            uart.write(data)
-            data = pack('f', cross_y)
-            uart.write(data)
-            print('angle_offset: %d, move_x: %d, cross_x: %d, cross_y: %d'%(angle_offset,move_x, cross_x,  cross_y))
-            '''
-            data = bytearray([flag1, abs(int(angle_offset)),  flag2, abs(move_x), cross_flag, cross_x, cross_y])
-            print(angle_offset, move_x, cross_flag, cross_x, cross_y)
-            uart.write(data)
-            '''
+        data = bytearray([3, 16])
+        uart.write(data)
+
+        if move_x==80:
+           move_x=0
+        data = pack('f', angle_offset)
+        uart.write(data)
+        data = pack('f', move_x)
+        uart.write(data)
+        data = pack('f', cross_y)
+        uart.write(data)
+        data = pack('f', cross_x)
+        uart.write(data)
+        led.off()
+        print('angle_offset: %d, move_x: %d, cross_x: %d, cross_y: %d'%(angle_offset,move_x, cross_y,  cross_x))
+
 
     #---------------------------------clear flag
     center_flag1=0;
@@ -334,11 +341,13 @@ while(True):
     cross_flag = 0
     i=0;
     j=0;
-
-
-
-
-
+    angle_offset=0
+    move_x=0
+    cross_x=0
+    cross_y=0
+    center_x_rect = 0
+    center_y_rect = 0
+    led.off()
 
 
 

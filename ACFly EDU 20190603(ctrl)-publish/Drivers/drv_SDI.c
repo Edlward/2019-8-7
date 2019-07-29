@@ -189,10 +189,10 @@ static void SDI_Server( unsigned int Task_ID )
 						}
 						else if( msg_type == 2 )
 						{
+							Patrol.Langing_flag = 0;
 							SDI_Point.x = *(float*)&msg_pack[0];
 							SDI_Point.y = *(float*)&msg_pack[4];
 							SDI_Point.z = 0;
-							Patrol.Langing_flag = 1;
 							SDI_Time = get_TIME_now();
 						}
 						else if( msg_type == 3 )
@@ -206,6 +206,11 @@ static void SDI_Server( unsigned int Task_ID )
 							//获取直角点
 							Patrol.cross_x = *(float*)&msg_pack[8];
 							Patrol.cross_y = *(float*)&msg_pack[12];
+							SDI_Time = get_TIME_now();
+						}
+						else if(msg_type==5)
+						{
+							Patrol.Langing_flag = 1;
 							SDI_Time = get_TIME_now();
 						}
 //						else if (msg_type == 4)
