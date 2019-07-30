@@ -272,29 +272,29 @@ static void UWB_Server( unsigned int Task_ID )
 								TAG0.rc_step=0;
 								break;
 							}
-			case 2: 
-				      if(r_data == 0x02)  /*版本号检查*/
-							{
-								TAG0.rc_step++; 
-								break;
-							}
-							else 
-							{
-								TAG0.rc_step=0;
-								break;
-							}
-		  case 3:
-              if(r_data == 0x0f)  /*标签号判别*/
-							{
-								//UWB_flag=0;
-								TAG0.rc_step++; 
-								break;
-							}
-							else 
-							{
-								TAG0.rc_step=0;
-								break;
-							}
+			case 2:  TAG0.rc_step++; break;
+//				      if(r_data == 0x02)  /*版本号检查*/
+//							{
+//								TAG0.rc_step++; 
+//								break;
+//							}
+//							else 
+//							{
+//								TAG0.rc_step=0;
+//								break;
+//							}
+		  case 3: TAG0.rc_step++; break;
+//              if(r_data == 0x0f)  /*标签号判别*/
+//							{
+//								//UWB_flag=0;
+//								TAG0.rc_step++; 
+//								break;
+//							}
+//							else 
+//							{
+//								TAG0.rc_step=0;
+//								break;
+//							}
 			case 4: TAG0.rc_step++; break;
 			case 5: TAG0.rc_step++; break;				
 		  /*接受基站0到各个标签的距离*/
@@ -302,80 +302,84 @@ static void UWB_Server( unsigned int Task_ID )
 			case 7: 
 						Hight_eight = r_data; 
 						TAG0.Anothor0 = ((uint16_t)Hight_eight<<8) | Low_eight; 
-			      if (TAG0.Anothor0 > 20000)  
-						{
-							TAG0.rc_step = 0;
-							TAG0.Anothor0 = last0;
-						}
-			      else 
-						{
-							TAG0.rc_step++;
-							last0 = TAG0.Anothor0;
-						}
+			      TAG0.rc_step++;
+//			      if (TAG0.Anothor0 > 20000)  
+//						{
+//							TAG0.rc_step = 0;
+//							TAG0.Anothor0 = last0;
+//						}
+//			      else 
+//						{
+//							TAG0.rc_step++;
+//							last0 = TAG0.Anothor0;
+//						}
 						break;
 			case 8: Low_eight = r_data; TAG0.rc_step++; break;				
 			case 9: 
 						Hight_eight = r_data; 
 						TAG0.Anothor1 = ((uint16_t)Hight_eight<<8) | Low_eight; 
-			      if (TAG0.Anothor1 > 20000) 
-						{
-							TAG0.rc_step = 0;
-							TAG0.Anothor1 = last1;
-						}
-			      else
-						{
-							TAG0.rc_step++;
-							last1 = TAG0.Anothor1;
-						}
+			      TAG0.rc_step++;
+//			      if (TAG0.Anothor1 > 20000) 
+//						{
+//							TAG0.rc_step = 0;
+//							TAG0.Anothor1 = last1;
+//						}
+//			      else
+//						{
+//							TAG0.rc_step++;
+//							last1 = TAG0.Anothor1;
+//						}
 						break;
 			case 10: Low_eight = r_data; TAG0.rc_step++; break;				
 			case 11: 
 						Hight_eight = r_data; 
 						TAG0.Anothor2 = ((uint16_t)Hight_eight<<8) | Low_eight; 
-			      if (TAG0.Anothor2 > 20000)
-						{
-							TAG0.rc_step = 0;
-							TAG0.Anothor2 = last2;
-						}
-			      else 
-						{
-							TAG0.rc_step++;
-							last2 = TAG0.Anothor2;
-						}
+			      Counter(0);			
+			      TAG0.rc_step=0;
+//			      if (TAG0.Anothor2 > 20000)
+//						{
+//							TAG0.rc_step = 0;
+//							TAG0.Anothor2 = last2;
+//						}
+//			      else 
+//						{
+//							TAG0.rc_step++;
+//							last2 = TAG0.Anothor2;
+//						}
 						break;
-			case 12: Low_eight = r_data; TAG0.rc_step++; break;				
-			case 13: 
-						Hight_eight = r_data; 
-						TAG0.Anothor3 = ((uint16_t)Hight_eight<<8) | Low_eight; 
-			      if (TAG0.Anothor3 > 20000)
-						{
-							TAG0.rc_step = 0;
-							TAG0.Anothor3 = last3;
-						}
-			      else 
-						{
-							TAG0.rc_step++;
-							last3 = TAG0.Anothor3;
-						}
-						break;
-			case 14: 
-				      if(r_data == '\n')  
-							{
-								TAG0.rc_step++; 
-								break;
-							}
-							else 
-							{
-								TAG0.rc_step=0;
-								break;
-							}
-			case 15: 
-						if(r_data == '\r')  /*一次完整数据接收完成*/
-						{	
-	            Counter(0);							
-						}
-						TAG0.rc_step = 0;
-						break;
+//			case 12: Low_eight = r_data; TAG0.rc_step++; break;				
+//			case 13: 
+//						Hight_eight = r_data; 
+//						TAG0.Anothor3 = ((uint16_t)Hight_eight<<8) | Low_eight; 
+//			      if (TAG0.Anothor3 > 20000)
+//						{
+//							TAG0.rc_step = 0;
+//							TAG0.Anothor3 = last3;
+//						}
+//			      else 
+//						{
+//							TAG0.rc_step++;
+//							last3 = TAG0.Anothor3;
+//						}
+//						break;
+//			case 14: 
+//				      if(r_data == '\n')  
+//							{
+//								TAG0.rc_step++; 
+//								break;
+//							}
+//							else 
+//							{
+//								TAG0.rc_step=0;
+//								break;
+//							}
+//			case 15: 
+//						if(r_data == '\r')  /*一次完整数据接收完成*/
+//						{	
+//	            Counter(0);							
+//						}
+//						TAG0.rc_step = 0;
+//						break;
 			default: TAG0.rc_step=0;break;
 		}
 	}

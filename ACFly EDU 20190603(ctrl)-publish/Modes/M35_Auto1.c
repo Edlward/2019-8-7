@@ -141,79 +141,133 @@ static void M35_Auto1_MainFunc()
 				}
 				break;
 				
-			case 3:
-				  if(Time_isValid(SDI_Time) && get_pass_time(SDI_Time) < 2.0f)
-					{
-						
-/*********************************降落部分************************************/
-						if(Patrol.Langing_flag == 3)
-					  {
-							Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
-													constrain_float( SDI_Point.x  , 50 ) ,	\
-													constrain_float( SDI_Point.y  , 50 ) ,	\
-													0.2f ,	\
-													0.2f	\
-												);
-							if(fabs(SDI_Point.x) > 5 && fabs(SDI_Point.y) > 5)
-							{
-								Mode_Inf->auto_counter = 0;
-							}
-							
-							if(++Mode_Inf->auto_counter >250)
-							{
-								Position_Control_set_XYLock();
-					      ++Mode_Inf->auto_step1;
-				      	Mode_Inf->auto_counter = 0;
-							}
-						}
-/******************************降落部分完**********************************/
-						
-						
-/****************************巡线部分***************************************/				
-						else if(Patrol.Langing_flag == 4)
-						{
-							if(fabs(SDI_Point.x) >75 && Locking_flag == 0)
-							{
-									Locking_flag = 1;
-									Mode_Inf->auto_counter = 0;
-							}
-							else if(++Mode_Inf->auto_counter < 100)
-							{
-									
-								Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.0f , 70 ) ));
-								Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
-													constrain_float( Patrol.cross_x*0.6  , 50 ) ,	\
-													constrain_float( Patrol.cross_y*0.6  , 50 ) ,	\
-													0.2f ,	\
-													0.2f	\
-												);
-								
-							}
-							else
-							{
-								Locking_flag = 0;
-							  Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.0f , 70 ) ));
-			          Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( 10.0f , constrain_float( SDI_Point.y * 0.6f , 100 )*5 , 0.08f , 0.08f	);
-							}
-						}
-/***************************巡线部分完**************************************/
-					}
-					
-					
-					
-					
-					
-					
-					
-					
-					
-				
-//			   if(Patrol.Langing_flag == 4)
+			case 3:	
+//			   if(Patrol.Langing_flag == 4 && Time_isValid(SDI_Time) && get_pass_time(SDI_Time) < 2.0f )
 //				 {
-//					Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.0f , 70 ) ));
-//			    Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( 15.0f , -constrain_float( SDI_Point.y * 3.0f , 100 )*5 , 0.08f , 0.08f	);
+//					 if(fabs(SDI_Point.x ) < 20)
+//					 {
+//						 Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.0f , 45 ) ));
+//						 // Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( 15.0f , -constrain_float( SDI_Point.y * 3.0f , 100 )*5 , 0.08f , 0.08f	);
+//							 Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
+//															10 ,	\
+//															constrain_float( SDI_Point.y*0.7  , 50 ) ,	\
+//															0.2f ,	\
+//															0.2f	\
+//														);
+//					 }
+//					 else if(fabs(SDI_Point.x ) > 20 && (fabs(SDI_Point.x ) < 80))
+//					 {
+//						 
+//						 
+//						 if(++Mode_Inf->auto_counter < 100)
+//						 {
+//							 Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.0f , 50 ) ));
+//						 // Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( 15.0f , -constrain_float( SDI_Point.y * 3.0f , 100 )*5 , 0.08f , 0.08f	);
+//							 Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
+//															3 ,	\
+//															0 ,	\
+//															0.1f ,	\
+//															0.1f	\
+//														);
+//						 }
+//						 else if(++Mode_Inf->auto_counter < 200)
+//						 {
+//									Position_Control_set_XYLock();
+//									Mode_Inf->auto_counter = 0;
+//							 
+//					 }
+//					 else if(fabs(SDI_Point.x ) > 80)
+//					 {
+//						 Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.30f , 70 ) )); 
+//						 Position_Control_set_XYLock();
+//						 
+//					 }
 //				 }
-//				//if(SDI_Point.x == 200)
+//			 }
+//			 else
+//			 { 
+//						 Position_Control_set_XYLock();
+//			 }
+
+       if(++Mode_Inf->auto_counter > 100 )
+			 {
+				 Position_Control_set_XYLock();
+				 if(Mode_Inf->auto_counter < 500)
+				  Mode_Inf->auto_counter = 0;
+			 }
+			 else if(Patrol.Langing_flag == 4 && Time_isValid(SDI_Time) && get_pass_time(SDI_Time) < 2.0f )
+			 { 
+					 if(fabs(SDI_Point.x ) < 20)
+					 {
+						 Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.0f , 45 ) ));
+						 // Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( 15.0f , -constrain_float( SDI_Point.y * 3.0f , 100 )*5 , 0.08f , 0.08f	);
+							 Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
+															10 ,	\
+															constrain_float( SDI_Point.y*0.7  , 50 ) ,	\
+															0.2f ,	\
+															0.2f	\
+														);
+					 }
+					 else if(fabs(SDI_Point.x ) > 20 && (fabs(SDI_Point.x ) < 80))
+					 {
+						 
+						 
+//						 if(++Mode_Inf->auto_counter < 100)
+//						 {
+							 Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.0f , 50 ) ));
+						 // Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( 15.0f , -constrain_float( SDI_Point.y * 3.0f , 100 )*5 , 0.08f , 0.08f	);
+							 Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
+															3 ,	\
+															0 ,	\
+															0.1f ,	\
+															0.1f	\
+														);
+//						 }
+//						 else if(++Mode_Inf->auto_counter < 200)
+//						 {
+//									Position_Control_set_XYLock();
+									//Mode_Inf->auto_counter = 0;
+							 
+					 }
+					 else if(fabs(SDI_Point.x ) > 80)
+					 {
+						 Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.30f , 70 ) )); 
+						 Position_Control_set_XYLock();
+						 
+					 }
+				 }
+			 else
+			 { 
+						 Position_Control_set_XYLock();
+			 }
+			 
+			 
+			 
+			 
+//					else
+//					{
+//						 	Attitude_Control_set_Target_YawRate( -degree2rad(constrain_float( SDI_Point.x * 1.0f , 45 ) ));
+//						 // Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( 15.0f , -constrain_float( SDI_Point.y * 3.0f , 100 )*5 , 0.08f , 0.08f	);
+//							 Position_Control_set_TargetVelocityBodyHeadingXY_AngleLimit( \
+//															10 ,	\
+//															constrain_float( SDI_Point.y  , 50 ) ,	\
+//															0.2f ,	\
+//															0.2f	\
+//														);
+//					}
+//					  Patrol.Langing_flag=0;
+//				 }
+//				 else if(Locking_flag == 0)
+//				{
+//					Locking_flag=1;
+//					Mode_Inf->auto_counter = 0;
+//					//Attitude_Control_set_YawLock();
+//					//Position_Control_set_XYLock();
+//				}
+				
+//				if(++Mode_Inf->auto_counter < 
+					 
+				//if(SDI_Point.x == 200)
 //				else if(Locking_flag == 0) 
 //				{
 //					Locking_flag=1;
